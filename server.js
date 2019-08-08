@@ -38,23 +38,17 @@ const checkScopes = jwtAuthz(['read:messages']);
 
 
 app.get('/api/public', function(req, res) {
-  let resObj;
-  let mappedObj = new Map();
-
   let APIExplorerObj = new Map();
   let DefaultAppObj = new Map();
   let TestAppObj = new Map();
-
 
   let displayAPIExplorer = '';
   let displayDefault = '';
   let displayTest = '';
 
-
   let APIExplorerArray = [];
   let DefaultAppArray = [];
   let TestAppArray = [];
-  let displayArray = [];
 
   let options = {
     method: 'POST',
@@ -72,13 +66,6 @@ app.get('/api/public', function(req, res) {
     if (error) throw new Error(error);
     let parsedData = JSON.parse(body)
 
-    let getClients = {
-      method: 'GET',
-      url: 'https://management-exercise.auth0.com/api/v2/clients',
-      audience: 'https://management-exercise.auth0.com/api/v2/',
-      headers: {'content-type': 'application/json', authorization: `Bearer ${parsedData.access_token}`}
-    }
-
     let getRules = {
       method: 'GET',
       url: 'https://management-exercise.auth0.com/api/v2/rules',
@@ -93,7 +80,6 @@ app.get('/api/public', function(req, res) {
       let ruleNameArray = [];
       let commentIndex = '';
       
-      
       for(let i = 0; i < ruleData.length; i++) {
         let ruleTest = ruleData[i].script.split(' ');
         commentIndex = ruleTest.indexOf('//');
@@ -103,41 +89,31 @@ app.get('/api/public', function(req, res) {
         if(clientNameFromScript[i].includes('Default') && ruleData[i].script.includes('Default')) {
           DefaultAppArray.push(ruleData[i].name);
           DefaultAppObj.set(clientNameFromScript[i], DefaultAppArray);
-          displayArray.push(DefaultAppObj);
         }
 
         if(clientNameFromScript[i].includes('APIExplorer') && ruleData[i].script.includes('APIExplorer')) {
           APIExplorerArray.push(ruleData[i].name);
           APIExplorerObj.set(clientNameFromScript[i], APIExplorerArray);
-          displayArray.push(APIExplorerObj);
         }
 
         if(clientNameFromScript[i].includes('TestApp') && ruleData[i].script.includes('TestApp')) {
           TestAppArray.push(ruleData[i].name);
           TestAppObj.set(clientNameFromScript[i], TestAppArray);
-          displayArray.push(TestAppObj);
         }
         
       }
-      console.log(clientNameFromScript, 'CLIENT NAME FROM SCRIPT');
-      console.log(ruleNameArray, 'RULE NAME ARRAY');
-      console.log(DefaultAppObj, 'DEFAULT OBJ');
-      console.log(APIExplorerObj, 'API EXPLORER OBJ');
-      console.log(TestAppObj, 'TestAppObj');
 
       displayAPIExplorer = JSON.stringify([...APIExplorerObj]);
       displayDefault = JSON.stringify([...DefaultAppObj]);
       displayTest = JSON.stringify([...TestAppObj]);
-      console.log(displayAPIExplorer, 'DISPLAY API EXPLORER')
 
-    res.json({
-      'APP 1': JSON.parse(displayAPIExplorer),
-      'APP 2': JSON.parse(displayTest),
-      'APP 3': JSON.parse(displayDefault)
-    });
-    });
-    
+      res.json({
+        'APP 1': JSON.parse(displayAPIExplorer),
+        'APP 2': JSON.parse(displayTest),
+        'APP 3': JSON.parse(displayDefault)
+      });
 
+    });
   });
 });
 
