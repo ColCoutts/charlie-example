@@ -1,8 +1,5 @@
 const express = require('express');
 const app = express();
-const jwt = require('express-jwt');
-const jwtAuthz = require('express-jwt-authz');
-const jwksRsa = require('jwks-rsa');
 const cors = require('cors');
 const request = require('request');
 
@@ -17,25 +14,6 @@ const corsOptions =  {
 };
 
 app.use(cors(corsOptions));
-
-const checkJwt = jwt({
-  // Dynamically provide a signing key based on the kid in the header and the singing keys provided by the JWKS endpoint.
-  secret: jwksRsa.expressJwtSecret({
-    cache: true,
-    rateLimit: true,
-    jwksRequestsPerMinute: 5,
-    jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`
-  }),
-
-  // Validate the audience and the issuer.
-  audience: process.env.AUTH0_AUDIENCE,
-  issuer: `https://${process.env.AUTH0_DOMAIN}/`,
-  algorithms: ['RS256']
-});
-
-
-const checkScopes = jwtAuthz(['read:messages']);
-
 
 app.get('/api/public', function(req, res) {
   let APIExplorerObj = new Map();
@@ -90,12 +68,12 @@ app.get('/api/public', function(req, res) {
           DefaultAppArray.push(ruleData[i].name);
           DefaultAppObj.set(clientNameFromScript[i], DefaultAppArray);
         }
-
+        
         if(clientNameFromScript[i].includes('APIExplorer') && ruleData[i].script.includes('APIExplorer')) {
           APIExplorerArray.push(ruleData[i].name);
           APIExplorerObj.set(clientNameFromScript[i], APIExplorerArray);
         }
-
+        
         if(clientNameFromScript[i].includes('TestApp') && ruleData[i].script.includes('TestApp')) {
           TestAppArray.push(ruleData[i].name);
           TestAppObj.set(clientNameFromScript[i], TestAppArray);
@@ -116,7 +94,6 @@ app.get('/api/public', function(req, res) {
     });
   });
 });
-
 
 app.use(function(err, req, res, next){
   console.error(err.stack);
