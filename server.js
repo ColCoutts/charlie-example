@@ -4,6 +4,8 @@ const jwt = require('express-jwt');
 const jwtAuthz = require('express-jwt-authz');
 const jwksRsa = require('jwks-rsa');
 const cors = require('cors');
+const request = require('request');
+
 require('dotenv').config();
 
 if (!process.env.AUTH0_DOMAIN || !process.env.AUTH0_AUDIENCE) {
@@ -31,25 +33,114 @@ const checkJwt = jwt({
   algorithms: ['RS256']
 });
 
+
 const checkScopes = jwtAuthz(['read:messages']);
 
+
 app.get('/api/public', function(req, res) {
-  res.json({
-    message: 'Hello from a public endpoint! You don\'t need to be authenticated to see this.'
+  let resObj;
+  let mappedObj = new Map();
+
+  let APIExplorerObj = new Map();
+  let DefaultAppObj = new Map();
+  let TestAppObj = new Map();
+
+
+  let displayAPIExplorer = '';
+  let displayDefault = '';
+  let displayTest = '';
+
+
+  let APIExplorerArray = [];
+  let DefaultAppArray = [];
+  let TestAppArray = [];
+  let displayArray = [];
+
+  let options = {
+    method: 'POST',
+    url: 'https://management-exercise.auth0.com/oauth/token',
+    headers: {'content-type': 'application/json'},
+    form: {
+        grant_type: 'client_credentials',
+        client_id: 'uEtn1qd7KjrlPRSZYtWBFKTFiCq4lEQg',
+        client_secret: '7CvxeFMx_P_P3kTB1kKz2rL76nUr8Jz0ls1txvDNuDPfxo3hBVzg8UrLLPVyxN5_',
+        audience: 'https://management-exercise.auth0.com/api/v2/'
+      }
+    };
+
+  request(options, function(error, response, body) {
+    if (error) throw new Error(error);
+    let parsedData = JSON.parse(body)
+
+    let getClients = {
+      method: 'GET',
+      url: 'https://management-exercise.auth0.com/api/v2/clients',
+      audience: 'https://management-exercise.auth0.com/api/v2/',
+      headers: {'content-type': 'application/json', authorization: `Bearer ${parsedData.access_token}`}
+    }
+
+    let getRules = {
+      method: 'GET',
+      url: 'https://management-exercise.auth0.com/api/v2/rules',
+      audience: 'https://management-exercise.auth0.com/api/v2/',
+      headers: {'content-type': 'application/json', authorization: `Bearer ${parsedData.access_token}`}
+    }
+
+    request(getRules, function(error, response, body) {
+      if (error) throw new Error(error);
+      let ruleData = JSON.parse(body)
+      let clientNameFromScript = [];
+      let ruleNameArray = [];
+      let commentIndex = '';
+      
+      
+      for(let i = 0; i < ruleData.length; i++) {
+        let ruleTest = ruleData[i].script.split(' ');
+        commentIndex = ruleTest.indexOf('//');
+        clientNameFromScript.push(ruleTest[commentIndex + 1]);
+        ruleNameArray.push(ruleData[i].name);
+
+        if(clientNameFromScript[i].includes('Default') && ruleData[i].script.includes('Default')) {
+          DefaultAppArray.push(ruleData[i].name);
+          DefaultAppObj.set(clientNameFromScript[i], DefaultAppArray);
+          displayArray.push(DefaultAppObj);
+        }
+
+        if(clientNameFromScript[i].includes('APIExplorer') && ruleData[i].script.includes('APIExplorer')) {
+          APIExplorerArray.push(ruleData[i].name);
+          APIExplorerObj.set(clientNameFromScript[i], APIExplorerArray);
+          displayArray.push(APIExplorerObj);
+        }
+
+        if(clientNameFromScript[i].includes('TestApp') && ruleData[i].script.includes('TestApp')) {
+          TestAppArray.push(ruleData[i].name);
+          TestAppObj.set(clientNameFromScript[i], TestAppArray);
+          displayArray.push(TestAppObj);
+        }
+        
+      }
+      console.log(clientNameFromScript, 'CLIENT NAME FROM SCRIPT');
+      console.log(ruleNameArray, 'RULE NAME ARRAY');
+      console.log(DefaultAppObj, 'DEFAULT OBJ');
+      console.log(APIExplorerObj, 'API EXPLORER OBJ');
+      console.log(TestAppObj, 'TestAppObj');
+
+      displayAPIExplorer = JSON.stringify([...APIExplorerObj]);
+      displayDefault = JSON.stringify([...DefaultAppObj]);
+      displayTest = JSON.stringify([...TestAppObj]);
+      console.log(displayAPIExplorer, 'DISPLAY API EXPLORER')
+
+    res.json({
+      'APP 1': JSON.parse(displayAPIExplorer),
+      'APP 2': JSON.parse(displayTest),
+      'APP 3': JSON.parse(displayDefault)
+    });
+    });
+    
+
   });
 });
 
-app.get('/api/private', checkJwt, function(req, res) {
-  res.json({
-    message: 'Hello from a private endpoint! You need to be authenticated to see this.'
-  });
-});
-
-app.get('/api/private-scoped', checkJwt, checkScopes, function(req, res) {
-  res.json({
-    message: 'Hello from a private endpoint! You need to be authenticated and have a scope of read:messages to see this.'
-  });
-});
 
 app.use(function(err, req, res, next){
   console.error(err.stack);
