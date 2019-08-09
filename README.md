@@ -15,6 +15,13 @@ At this point you can either download the configured sample from the [Node(Expre
 
 The dotenv isn't entirely necessary for this example but it's good habit to protect sensitive client information regardless.
 
+
+## Rule Configuration
+
+This is a very small step that will require you to go into any rules you have enabled for your application and add a commented out line with the corresponding application name. For example:
+
+![Rule example](/images/image2.png)
+
 ## Setting up your application
 
 At this point your ```server.js``` file should look something like this.
@@ -112,5 +119,42 @@ Next we will make a request to the ```/api/v2/rules``` endpoint to receive all r
       let ruleNameArray = [];
       let commentIndex = '';
     });
+
+```
+Now we can add the following logic to this request which will check if the name of the app is present within the specific rule, if so we populate the corresponding array with that rule name. We are also adding fields of the application name and corresponding array of rules with our ```filteredClient``` object.
+
+```
+      for(let i = 0; i < ruleData.length; i++) {
+
+        let ruleScriptArray = ruleData[i].script.split(' ');
+        commentIndex = ruleScriptArray.indexOf('//');
+        clientNameFromScript.push(ruleScriptArray[commentIndex + 1]);
+        ruleNameArray.push(ruleData[i].name);
+
+        if(clientNameFromScript[i].includes('APIExplorer') && ruleData[i].script.includes('APIExplorer')) {
+          APIExplorerArray.push(ruleData[i].name);
+          filteredClient[clientNameFromScript[i]] = { id: clientNameFromScript[i], rules: [...APIExplorerArray] }
+        }
+        
+        if(clientNameFromScript[i].includes('TestApp') && ruleData[i].script.includes('TestApp')) {
+          TestAppArray.push(ruleData[i].name);
+          filteredClient[clientNameFromScript[i]] = { id: clientNameFromScript[i], rules: [...TestAppArray] }
+        }
+        
+        if(clientNameFromScript[i].includes('Default') && ruleData[i].script.includes('Default')) {
+          DefaultAppArray.push(ruleData[i].name);
+          filteredClient[clientNameFromScript[i]] = { id: clientNameFromScript[i], rules: [...DefaultAppArray] }
+        }
+      }
+
+```
+Finally, all we need to do is manipulate our filteredClient one more time and place it into our res body.
+
+```
+    let displayInfo = JSON.stringify(filteredClient);
+
+      res.json({
+        'Filtered App List': JSON.parse(displayInfo)
+      });
 
 ```
