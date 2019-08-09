@@ -59,8 +59,6 @@ app.get('/api/public', function(req, res) {
         clientNameFromScript.push(ruleScriptArray[commentIndex + 1]);
         ruleNameArray.push(ruleData[i].name);
 
-        console.log(clientNameFromScript, 'CLIENT NAME FROM SCRIPT');
-        
         if(clientNameFromScript[i].includes('APIExplorer') && ruleData[i].script.includes('APIExplorer')) {
           APIExplorerArray.push(ruleData[i].name);
           filteredClient[clientNameFromScript[i]] = { id: clientNameFromScript[i], rules: [...APIExplorerArray] }
