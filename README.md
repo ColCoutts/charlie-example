@@ -26,7 +26,7 @@ This step will make sense once we're calling the Management API where we can acc
 
 ## Setting up your application
 
-At this point your ```server.js``` file should look something like this.
+At this point your ```server.js``` file should look something like this. If you're working in a Node environment you can use ```npm start``` to start your server. This will also be useful to console.log what you're getting back from the API in case you run into any issues during this setup.
 
 ```
 const express = require('express');
@@ -236,3 +236,6 @@ app.get('/api/public', function(req, res) {
 });
 
 ```
+To view the results of this code, go to your localhost server and append ```/api/public``` to see the formatted JSON of you application and rules.
+
+![Filtered Response example](/images/image3.png)
