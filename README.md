@@ -18,7 +18,7 @@ The dotenv isn't entirely necessary for this example but it's good habit to prot
 
 ## Rule Configuration
 
-This is a very small step that will require you to go into any rules you have enabled for your application and add a commented out line with the corresponding application name. For example:
+This is a very small step that will require you to go into any rules you have enabled for your application and add a commented out line with the corresponding application name. Its also important to place this line in the same place for each rule as well as giving the application name 1 space away from the forward slashes. For example:
 
 ![Rule example](/images/image2.png)
 
