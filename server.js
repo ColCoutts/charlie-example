@@ -3,7 +3,6 @@ const app = express();
 const cors = require('cors');
 const request = require('request');
 
-
 require('dotenv').config();
 
 if (!process.env.AUTH0_DOMAIN || !process.env.AUTH0_AUDIENCE) {
@@ -17,20 +16,11 @@ const corsOptions =  {
 app.use(cors(corsOptions));
 
 app.get('/api/public', function(req, res) {
-  let APIExplorerObj = new Map();
-  let DefaultAppObj = new Map();
-  let TestAppObj = new Map();
-
-  let displayAPIExplorer = '';
-  let displayDefault = '';
-  let displayTest = '';
-
   let APIExplorerArray = [];
   let DefaultAppArray = [];
   let TestAppArray = [];
 
   let filteredClient = {};
-  let ArrayForObj = [];
 
   let options = {
     method: 'POST',
@@ -63,6 +53,7 @@ app.get('/api/public', function(req, res) {
       let commentIndex = '';
       
       for(let i = 0; i < ruleData.length; i++) {
+
         let ruleScriptArray = ruleData[i].script.split(' ');
         commentIndex = ruleScriptArray.indexOf('//');
         clientNameFromScript.push(ruleScriptArray[commentIndex + 1]);
@@ -70,40 +61,24 @@ app.get('/api/public', function(req, res) {
         
         if(clientNameFromScript[i].includes('APIExplorer') && ruleData[i].script.includes('APIExplorer')) {
           APIExplorerArray.push(ruleData[i].name);
-          APIExplorerObj.set(clientNameFromScript[i], APIExplorerArray);
-          
-          // APINormablObj['app'] = { app2: clientNameFromScript[i], APIExplorerArray };
-          filteredClient['app'] = { id: clientNameFromScript[i], rules: [...APIExplorerArray] }
-          
-          ArrayForObj.push({ id: clientNameFromScript[i], rules: APIExplorerArray });
+          filteredClient[clientNameFromScript[i]] = { id: clientNameFromScript[i], rules: [...APIExplorerArray] }
         }
         
         if(clientNameFromScript[i].includes('TestApp') && ruleData[i].script.includes('TestApp')) {
           TestAppArray.push(ruleData[i].name);
-          TestAppObj.set(clientNameFromScript[i], TestAppArray);
-          
-          filteredClient['app2'] = { id: clientNameFromScript[i], rules: [...TestAppArray] }
+          filteredClient[clientNameFromScript[i]] = { id: clientNameFromScript[i], rules: [...TestAppArray] }
         }
         
         if(clientNameFromScript[i].includes('Default') && ruleData[i].script.includes('Default')) {
           DefaultAppArray.push(ruleData[i].name);
-          DefaultAppObj.set(clientNameFromScript[i], DefaultAppArray);
-
-          filteredClient['app3'] = { id: clientNameFromScript[i], rules: [...DefaultAppArray] }
+          filteredClient[clientNameFromScript[i]] = { id: clientNameFromScript[i], rules: [...DefaultAppArray] }
         }
       }
 
-      displayAPIExplorer = JSON.stringify([...APIExplorerObj]);
-      displayDefault = JSON.stringify([...DefaultAppObj]);
-      displayTest = JSON.stringify([...TestAppObj]);
-      // filteredClient['rule list'] = APINormablObj;
-      // console.log('FIlteredClient', filteredClient);
-      console.log('FILTERED CLIENT', filteredClient);
+      let displayInfo = JSON.stringify(filteredClient);
 
       res.json({
-        'APP 1': JSON.parse(displayAPIExplorer),
-        'APP 2': JSON.parse(displayTest),
-        'APP 3': JSON.parse(displayDefault)
+        'Filtered App List': JSON.parse(displayInfo)
       });
 
     });
