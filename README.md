@@ -7,3 +7,4 @@ This guide shows how to create a simple app that filters rules by client name. T
 
 I would also recommend checking that the M2M application you've created has both your created API as well as the Auth0 Management API authorized, this can be found in the APIs tab in the Applications section.
 
+[Applications Section](/images/image1.png)
