@@ -15,6 +15,8 @@ At this point you can either download the configured sample from the [Node(Expre
 
 The dotenv isn't entirely necessary for this example but it's good habit to protect sensitive client information regardless.
 
+## Setting up your application
+
 At this point your ```server.js``` file should look something like this.
 
 ```
@@ -48,4 +50,67 @@ app.use(function(err, req, res, next){
 
 app.listen(3010);
 console.log('Listening on http://localhost:3010');
+```
+We'll be placing this code in the public route for this example. Replicating authenticated requests is also possible through Postman which allow attaching Access Tokens to requests to validate the user.
+
+```
+  app.get('/api/public', function(req, res) {
+    res.json({
+      'title': 'coming soon'
+    })
+  });
+```
+I start by declaring empty arrays for each of my applications that I will populate with the corresponding rules. I will also create a presentational ```filteredClient``` object that will be used in the response body. Here for the options object populate the necessary fields with yoru specific app information.
+
+```
+  let APIExplorerArray = [];
+  let DefaultAppArray = [];
+  let TestAppArray = [];
+
+  let filteredClient = {};
+
+  let options = {
+    method: 'POST',
+    url: 'https://{your-tenant}.auth0.com/oauth/token',
+    headers: {'content-type': 'application/json'},
+    form: {
+        grant_type: 'client_credentials',
+        client_id: {app-client-id},
+        client_secret: {app-client-secret},
+        audience: 'https://{your-tenant}.auth0.com/api/v2/'
+      }
+    };
+
+```
+
+Next we will make our first request for an Access Token which we'll use later to fetch our rules. The Access Token gets passed in with string interpolation for the ```getRules``` object.
+
+```
+  request(options, function(error, response, body) {
+    if (error) throw new Error(error);
+    let parsedData = JSON.parse(body)
+
+    let getRules = {
+      method: 'GET',
+      url: 'https://{your-tenant}.auth0.com/api/v2/rules',
+      audience: '{your-tenant}.auth0.com/api/v2/',
+      headers: {'content-type': 'application/json',
+                authorization: `Bearer ${parsedData.access_token}`
+              }
+    }
+  }
+
+```
+
+Next we will make a request to the ```/api/v2/rules``` endpoint to receive all rules related to the tenant. Here I establish arrays for the ```ruleNameArray``` and ```clientNameFromScript``` that we will receive from the rule body.
+
+```
+    request(getRules, function(error, response, body) {
+      if (error) throw new Error(error);
+      let ruleData = JSON.parse(body)
+      let clientNameFromScript = [];
+      let ruleNameArray = [];
+      let commentIndex = '';
+    });
+
 ```

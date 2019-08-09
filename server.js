@@ -58,6 +58,8 @@ app.get('/api/public', function(req, res) {
         commentIndex = ruleScriptArray.indexOf('//');
         clientNameFromScript.push(ruleScriptArray[commentIndex + 1]);
         ruleNameArray.push(ruleData[i].name);
+
+        console.log(clientNameFromScript, 'CLIENT NAME FROM SCRIPT');
         
         if(clientNameFromScript[i].includes('APIExplorer') && ruleData[i].script.includes('APIExplorer')) {
           APIExplorerArray.push(ruleData[i].name);
@@ -80,7 +82,6 @@ app.get('/api/public', function(req, res) {
       res.json({
         'Filtered App List': JSON.parse(displayInfo)
       });
-
     });
   });
 });
