@@ -22,6 +22,8 @@ This is a very small step that will require you to go into any rules you have en
 
 ![Rule example](/images/image2.png)
 
+This step will make sense once we're calling the Management API where we can access this information later.
+
 ## Setting up your application
 
 At this point your ```server.js``` file should look something like this.
@@ -156,5 +158,81 @@ Finally, all we need to do is manipulate our filteredClient one more time and pl
       res.json({
         'Filtered App List': JSON.parse(displayInfo)
       });
+
+```
+At this point your entire app route should look something like this:
+
+```
+
+app.get('/api/public', function(req, res) {
+  let APIExplorerArray = [];
+  let DefaultAppArray = [];
+  let TestAppArray = [];
+
+  let filteredClient = {};
+
+  let options = {
+    method: 'POST',
+    url: 'https://management-exercise.auth0.com/oauth/token',
+    headers: {'content-type': 'application/json'},
+    form: {
+        grant_type: 'client_credentials',
+        client_id: 'uEtn1qd7KjrlPRSZYtWBFKTFiCq4lEQg',
+        client_secret: '7CvxeFMx_P_P3kTB1kKz2rL76nUr8Jz0ls1txvDNuDPfxo3hBVzg8UrLLPVyxN5_',
+        audience: 'https://management-exercise.auth0.com/api/v2/'
+      }
+    };
+
+  request(options, function(error, response, body) {
+    if (error) throw new Error(error);
+    let parsedData = JSON.parse(body)
+
+    let getRules = {
+      method: 'GET',
+      url: 'https://management-exercise.auth0.com/api/v2/rules',
+      audience: 'https://management-exercise.auth0.com/api/v2/',
+      headers: {'content-type': 'application/json', authorization: `Bearer ${parsedData.access_token}`}
+    }
+
+    request(getRules, function(error, response, body) {
+      if (error) throw new Error(error);
+      let ruleData = JSON.parse(body)
+      let clientNameFromScript = [];
+      let ruleNameArray = [];
+      let commentIndex = '';
+      
+      for(let i = 0; i < ruleData.length; i++) {
+
+        let ruleScriptArray = ruleData[i].script.split(' ');
+        commentIndex = ruleScriptArray.indexOf('//');
+        clientNameFromScript.push(ruleScriptArray[commentIndex + 1]);
+        ruleNameArray.push(ruleData[i].name);
+
+        console.log(clientNameFromScript, 'CLIENT NAME FROM SCRIPT');
+        
+        if(clientNameFromScript[i].includes('APIExplorer') && ruleData[i].script.includes('APIExplorer')) {
+          APIExplorerArray.push(ruleData[i].name);
+          filteredClient[clientNameFromScript[i]] = { id: clientNameFromScript[i], rules: [...APIExplorerArray] }
+        }
+        
+        if(clientNameFromScript[i].includes('TestApp') && ruleData[i].script.includes('TestApp')) {
+          TestAppArray.push(ruleData[i].name);
+          filteredClient[clientNameFromScript[i]] = { id: clientNameFromScript[i], rules: [...TestAppArray] }
+        }
+        
+        if(clientNameFromScript[i].includes('Default') && ruleData[i].script.includes('Default')) {
+          DefaultAppArray.push(ruleData[i].name);
+          filteredClient[clientNameFromScript[i]] = { id: clientNameFromScript[i], rules: [...DefaultAppArray] }
+        }
+      }
+
+      let displayInfo = JSON.stringify(filteredClient);
+
+      res.json({
+        'Filtered App List': JSON.parse(displayInfo)
+      });
+    });
+  });
+});
 
 ```
