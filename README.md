@@ -238,4 +238,4 @@ app.get('/api/public', function(req, res) {
 ```
 To view the results of this code, go to your localhost server and append ```/api/public``` to see the formatted JSON of you application and rules.
 
-![Filtered Response example](/images/image3.png)
+![Filtered Response](/images/image3.png)
