@@ -210,17 +210,17 @@ app.get('/api/public', function(req, res) {
 
         console.log(clientNameFromScript, 'CLIENT NAME FROM SCRIPT');
         
-        if(clientNameFromScript[i].includes('APIExplorer') && ruleData[i].script.includes('APIExplorer')) {
+        if(clientNameFromScript[i].includes('NameOfYourApp') && ruleData[i].script.includes('NameOfYourApp')) {
           APIExplorerArray.push(ruleData[i].name);
           filteredClient[clientNameFromScript[i]] = { id: clientNameFromScript[i], rules: [...APIExplorerArray] }
         }
         
-        if(clientNameFromScript[i].includes('TestApp') && ruleData[i].script.includes('TestApp')) {
+        if(clientNameFromScript[i].includes('NameOfYourOtherApp') && ruleData[i].script.includes('NameOfYourOtherApp')) {
           TestAppArray.push(ruleData[i].name);
           filteredClient[clientNameFromScript[i]] = { id: clientNameFromScript[i], rules: [...TestAppArray] }
         }
         
-        if(clientNameFromScript[i].includes('Default') && ruleData[i].script.includes('Default')) {
+        if(clientNameFromScript[i].includes('NameOfYourOtherOtherApp') && ruleData[i].script.includes('NameOfYourOtherOtherApp')) {
           DefaultAppArray.push(ruleData[i].name);
           filteredClient[clientNameFromScript[i]] = { id: clientNameFromScript[i], rules: [...DefaultAppArray] }
         }
